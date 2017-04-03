@@ -1,0 +1,719 @@
+using IBCA.Class;
+using IBCA.Model;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Web;
+
+namespace IBCA.BusinessIntelligence
+{
+    public class BodegaBI
+    {
+        Generales general = new Generales();
+
+        public DataSet getPersonalCortesGyeADO()
+        {
+            DataSet theDataSet = new DataSet("getPersonalCortesGyeADO");
+            String connectionString = ConfigurationManager.ConnectionStrings["IBCA_BIConnectionString"].ConnectionString;
+
+            try
+            {
+                SqlCommand theCommand = new SqlCommand("select valor from IBCA_PARAMETROS where clave like '%PERSONAL_CORTES_GYE%'");
+                theCommand.Connection = new SqlConnection(connectionString);
+                theCommand.CommandTimeout = 0;
+
+                SqlDataAdapter theDataAdapter = new SqlDataAdapter(theCommand);
+                theCommand.Connection.Open();
+                theDataAdapter.Fill(theDataSet);
+                theCommand.Connection.Close();
+            }
+            catch (Exception ex)
+            {
+                general.Log(ex.Message, Generales.TiposError.error);
+            }
+
+            return theDataSet;
+        }
+
+        public DataSet fn_ibca_reporteweb_bodega_abastecimientoseleccionADO()
+        {
+            DataSet theDataSet = new DataSet("fn_ibca_reporteweb_bodega_abastecimientoseleccion");
+            String connectionString = ConfigurationManager.ConnectionStrings["IBCA_BIConnectionString"].ConnectionString;
+
+            try
+            {
+                SqlCommand theCommand = new SqlCommand("select * from dbo.fn_ibca_reporteweb_bodega_abastecimientoseleccion()");
+                theCommand.Connection = new SqlConnection(connectionString);
+                theCommand.CommandTimeout = 0;
+
+                SqlDataAdapter theDataAdapter = new SqlDataAdapter(theCommand);
+                theCommand.Connection.Open();
+                theDataAdapter.Fill(theDataSet);
+                theCommand.Connection.Close();
+            }
+            catch (Exception ex)
+            {
+                general.Log(ex.Message, Generales.TiposError.error);
+            }
+
+            return theDataSet;
+        }
+
+        public DataSet fn_ibca_bodega_get_OV_detalle_corteADO(String _ordenVenta)
+        {
+            DataSet theDataSet = new DataSet("fn_ibca_bodega_get_OV_detalle_corteADO");
+            String connectionString = ConfigurationManager.ConnectionStrings["IBCA_BIConnectionString"].ConnectionString;
+
+            if (_ordenVenta == "")
+                _ordenVenta = "\'\'";
+            else
+                _ordenVenta = "\'" + _ordenVenta + "\'";
+
+            try
+            {
+                SqlCommand theCommand = new SqlCommand("select * from dbo.fn_ibca_bodega_get_OV_detalle_corte(" + _ordenVenta + ")");
+                theCommand.Connection = new SqlConnection(connectionString);
+                theCommand.CommandTimeout = 0;
+
+                SqlDataAdapter theDataAdapter = new SqlDataAdapter(theCommand);
+                theCommand.Connection.Open();
+                theDataAdapter.Fill(theDataSet);
+                theCommand.Connection.Close();
+            }
+            catch (Exception ex)
+            {
+                general.Log(ex.Message, Generales.TiposError.error);
+            }
+
+            return theDataSet;
+        }
+
+        public String sp_ibca_bodega_ov_abastecimientouserADO(String _ordenVenta, String _usuario)
+        {
+            String respuesta = "";
+
+            try
+            {
+                String connectionString = ConfigurationManager.ConnectionStrings["IBCA_BIConnectionString"].ConnectionString;
+                object result = new object();
+
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_ibca_bodega_ov_abastecimientouser ", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        cmd.Parameters.Add("@ov", SqlDbType.VarChar).Value = _ordenVenta;
+                        cmd.Parameters.Add("@user", SqlDbType.VarChar).Value = _usuario;
+
+                        con.Open();
+
+                        result = cmd.ExecuteNonQuery();
+                    }
+                }
+
+                respuesta = "Usuario " + _usuario + " asignado a la orden " + _ordenVenta + ". ";
+            }
+            catch (Exception ex)
+            {
+                respuesta = "Error al asignar Usuario: " + ex.InnerException.ToString();
+                general.Log("Error en VentasProyeccionVendedoresExist: " + ex.Message, Generales.TiposError.error);
+            }
+
+            return respuesta;
+        }
+
+        public DataSet fn_ibca_reporteweb_bodega_guianodespachadaADO(DateTime _fechaConsulta)
+        {
+            DataSet theDataSet = new DataSet("fn_ibca_reporteweb_bodega_guianodespachadaADO");
+            String connectionString = ConfigurationManager.ConnectionStrings["IBCA_BIConnectionString"].ConnectionString;
+
+            try
+            {
+                SqlCommand theCommand = new SqlCommand("select * from dbo.fn_ibca_reporteweb_bodega_guianodespachada(@fecha, null)");
+                theCommand.Parameters.Add(new SqlParameter { ParameterName = "@fecha", Value = _fechaConsulta, SqlDbType = SqlDbType.DateTime });
+                theCommand.Connection = new SqlConnection(connectionString);
+                theCommand.CommandTimeout = 0;
+
+                SqlDataAdapter theDataAdapter = new SqlDataAdapter(theCommand);
+                theCommand.Connection.Open();
+                theDataAdapter.Fill(theDataSet);
+                theCommand.Connection.Close();
+            }
+            catch (Exception ex)
+            {
+                general.Log(ex.Message, Generales.TiposError.error);
+            }
+
+            return theDataSet;
+        }
+
+        public DataSet fn_ibca_reporteweb_bodega_guianodespachadaADO(DateTime _fechaConsulta, String _guiaRemision)
+        {
+            DataSet theDataSet = new DataSet("fn_ibca_reporteweb_bodega_guianodespachadaADO");
+            String connectionString = ConfigurationManager.ConnectionStrings["IBCA_BIConnectionString"].ConnectionString;
+
+            try
+            {
+                SqlCommand theCommand = new SqlCommand("select * from dbo.fn_ibca_reporteweb_bodega_guianodespachada(@fecha, @guia)");
+                theCommand.Parameters.Add(new SqlParameter { ParameterName = "@fecha", Value = _fechaConsulta, SqlDbType = SqlDbType.DateTime });
+                theCommand.Parameters.Add(new SqlParameter { ParameterName = "@guia", Value = _guiaRemision, SqlDbType = SqlDbType.VarChar });
+                theCommand.Connection = new SqlConnection(connectionString);
+                theCommand.CommandTimeout = 0;
+
+                SqlDataAdapter theDataAdapter = new SqlDataAdapter(theCommand);
+                theCommand.Connection.Open();
+                theDataAdapter.Fill(theDataSet);
+                theCommand.Connection.Close();
+            }
+            catch (Exception ex)
+            {
+                general.Log(ex.Message, Generales.TiposError.error);
+            }
+
+            return theDataSet;
+        }
+
+        public DataSet getLecSaleGuiaRemLineTableByNumADO(String _num)
+        {
+            DataSet theDataSet = new DataSet("getLecSaleGuiaRemLineTableByNumADO");
+            String connectionString = ConfigurationManager.ConnectionStrings["IBCAGYEConnectionString"].ConnectionString;
+
+            try
+            {
+                SqlCommand theCommand = new SqlCommand("select lec.recid, lec.linenum, lec.itemid, lec.lineamount from dbo.LecSaleGuiaRemLineTable lec with(nolock) where lec.dataareaid = 'ibca' and lec.num = '" + _num + "' order by lec.linenum asc");
+                theCommand.Connection = new SqlConnection(connectionString);
+                theCommand.CommandTimeout = 0;
+
+                SqlDataAdapter theDataAdapter = new SqlDataAdapter(theCommand);
+                theCommand.Connection.Open();
+                theDataAdapter.Fill(theDataSet);
+                theCommand.Connection.Close();
+            }
+            catch (Exception ex)
+            {
+                general.Log(ex.Message, Generales.TiposError.error);
+            }
+
+            return theDataSet;
+        }
+
+        //public DataSet getTirillas(String _ov)
+        //{
+        //    DataSet theDataSet = new DataSet();
+        //    String connectionString = ConfigurationManager.ConnectionStrings["IBCA_BIConnectionString"].ConnectionString;
+        //    SqlDataAdapter adapt = new SqlDataAdapter();
+
+        //    try
+        //    {
+        //        using (SqlConnection connection = new SqlConnection(connectionString))
+        //        {
+        //            connection.Open();
+
+        //            SqlCommand theCommandA = new SqlCommand("select * from fn_ibca_bodega_get_OV_cabecera(@ov)", connection);
+        //            theCommandA.Parameters.Add(new SqlParameter { ParameterName = "@ov", Value = _ov });
+        //            theCommandA.CommandTimeout = 0;
+
+        //            theDataSet.Tables.Add("fn_ibca_bodega_get_OV_cabecera");
+
+        //            SqlCommand theCommandB = new SqlCommand("select * from [dbo].[fn_ibca_bodega_get_OV_detalle_Individual](@ov, null);", connection);
+        //            theCommandB.Parameters.Add(new SqlParameter { ParameterName = "@ov", Value = _ov });
+        //            //theCommandB.Parameters.Add(new SqlParameter { ParameterName = "@filtro", Value = null });
+        //            theCommandB.CommandTimeout = 0;
+
+        //            theDataSet.Tables.Add("fn_ibca_bodega_get_OV_detalle_Individual");
+
+        //            SqlCommand theCommandC = new SqlCommand("select * from [dbo].[fn_ibca_bodega_get_OV_detalle_Tirilla](@ov, null);", connection);
+        //            theCommandC.Parameters.Add(new SqlParameter { ParameterName = "@ov", Value = _ov });
+        //            //theCommandC.Parameters.Add(new SqlParameter { ParameterName = "@filtro", Value = null });
+        //            theCommandC.CommandTimeout = 0;
+
+        //            theDataSet.Tables.Add("fn_ibca_bodega_get_OV_detalle_Tirilla");
+
+        //            adapt.SelectCommand = theCommandA;
+        //            adapt.Fill(theDataSet.Tables["fn_ibca_bodega_get_OV_cabecera"]);
+        //            adapt.SelectCommand = theCommandB;
+        //            adapt.Fill(theDataSet.Tables["fn_ibca_bodega_get_OV_detalle_Individual"]);
+        //            adapt.SelectCommand = theCommandC;
+        //            adapt.Fill(theDataSet.Tables["fn_ibca_bodega_get_OV_detalle_Tirilla"]);
+
+        //            connection.Close();
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        general.Log(ex.Message, Generales.TiposError.error);
+        //    }
+
+        //    return theDataSet;
+        //}
+
+        public List<fn_ibca_reporteweb_bodega_guiaremision_nodespachada_detalle_Result> fn_ibca_get_guiaremision_nodespachada_detalleEDM(String _guiaRemision)
+        {
+            List<fn_ibca_reporteweb_bodega_guiaremision_nodespachada_detalle_Result> proyeccionList = new List<fn_ibca_reporteweb_bodega_guiaremision_nodespachada_detalle_Result>();
+
+            try
+            {
+                using (var ctx = new IBCA_BIEntities())
+                {
+                    ctx.Database.CommandTimeout = 0;
+                    proyeccionList = ctx.fn_ibca_reporteweb_bodega_guiaremision_nodespachada_detalle(_guiaRemision).ToList();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                general.Log("Error en fn_ibca_get_guiaremision_nodespachada_detalleEDM: " + ex.Message, Generales.TiposError.error);
+                throw ex;
+            }
+
+            return proyeccionList;
+        }
+
+        public DataSet fn_ibca_reporteweb_bodega_guiainfoADO(String _guiaRemision)
+        {
+            DataSet theDataSet = new DataSet("fn_ibca_reporteweb_bodega_guiainfoADO");
+            String connectionString = ConfigurationManager.ConnectionStrings["IBCA_BIConnectionString"].ConnectionString;
+
+            try
+            {
+                SqlCommand theCommand = new SqlCommand("select * from dbo.fn_ibca_reporteweb_bodega_guiainfo(@guia)");
+                theCommand.Parameters.Add(new SqlParameter { ParameterName = "@guia", Value = _guiaRemision, SqlDbType = SqlDbType.VarChar });
+                theCommand.Connection = new SqlConnection(connectionString);
+                theCommand.CommandTimeout = 0;
+
+                SqlDataAdapter theDataAdapter = new SqlDataAdapter(theCommand);
+                theCommand.Connection.Open();
+                theDataAdapter.Fill(theDataSet);
+                theCommand.Connection.Close();
+            }
+            catch (Exception ex)
+            {
+                general.Log(ex.Message, Generales.TiposError.error);
+            }
+
+            return theDataSet;
+        }
+
+        public List<fn_ibca_reporteweb_bodega_guiainfo_Result> fn_ibca_reporteweb_bodega_guiainfoEDM(String _guiaRemision)
+        {
+            List<fn_ibca_reporteweb_bodega_guiainfo_Result> guiaInfoList = new List<fn_ibca_reporteweb_bodega_guiainfo_Result>();
+
+            try
+            {
+                using (var ctx = new IBCA_BIEntities())
+                {
+                    ctx.Database.CommandTimeout = 0;
+                    guiaInfoList = ctx.fn_ibca_reporteweb_bodega_guiainfo(_guiaRemision).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                general.Log("Error en fn_ibca_reporteweb_bodega_guiainfoEDM: " + ex.Message, Generales.TiposError.error);
+                throw ex;
+            }
+
+            return guiaInfoList;
+        }
+
+        public List<fn_ibca_reporteweb_bodega_factura_nodespachada_Result> fn_ibca_reporteweb_bodega_factura_nodespachadaEDM(String _factura, String _ciudad, DateTime? _fecha = null)
+        {
+            List<fn_ibca_reporteweb_bodega_factura_nodespachada_Result> facturasNoDespachadaList = new List<fn_ibca_reporteweb_bodega_factura_nodespachada_Result>();
+
+            try
+            {
+                using (var ctx = new IBCA_BIEntities())
+                {
+                    ctx.Database.CommandTimeout = 0;
+                    facturasNoDespachadaList = ctx.fn_ibca_reporteweb_bodega_factura_nodespachada(_fecha, _factura, _ciudad).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                general.Log("Error en fn_ibca_reporteweb_bodega_factura_nodespachadaEDM: " + ex.Message, Generales.TiposError.error);
+                throw ex;
+            }
+
+            return facturasNoDespachadaList;
+        }
+
+        public int sp_ibca_bodega_registra_fechadespachoEDM(String _factura)
+        {
+            int respuesta = 0;
+
+            try
+            {
+                using (var ctx = new IBCA_BIEntities())
+                {
+                    ctx.Database.CommandTimeout = 0;
+                    respuesta = ctx.sp_ibca_bodega_registra_fechadespacho(_factura);
+                }
+            }
+            catch (Exception ex)
+            {
+                general.Log("Error en sp_ibca_bodega_registra_fechadespachoEDM: " + ex.Message, Generales.TiposError.error);
+                throw ex;
+            }
+
+            return respuesta;
+        }
+
+        public DataSet fn_ibca_reporteweb_bodega_get_detallefacturaADO(String _Factura, String _Tipo)
+        {
+            DataSet theDataSet = new DataSet("fn_ibca_reporteweb_bodega_get_detallefacturaADO");
+            String connectionString = ConfigurationManager.ConnectionStrings["IBCA_BIConnectionString"].ConnectionString;
+
+            if (_Factura == "")
+                _Factura = "\'\'";
+            else
+                _Factura = "\'" + _Factura + "\'";
+
+            try
+            {
+                SqlCommand theCommand;
+
+                if (_Tipo.Equals(""))
+                {
+                    theCommand = new SqlCommand("select * from dbo.fn_ibca_reporteweb_bodega_get_detallefactura(" + _Factura + ", null)");
+                }
+                else
+                {
+                    theCommand = new SqlCommand("select * from dbo.fn_ibca_reporteweb_bodega_get_detallefactura(" + _Factura + ", '" + _Tipo + "')");
+                }
+
+                theCommand.Connection = new SqlConnection(connectionString);
+                theCommand.CommandTimeout = 0;
+
+                SqlDataAdapter theDataAdapter = new SqlDataAdapter(theCommand);
+                theCommand.Connection.Open();
+                theDataAdapter.Fill(theDataSet);
+                theCommand.Connection.Close();
+            }
+            catch (Exception ex)
+            {
+                general.Log(ex.Message, Generales.TiposError.error);
+            }
+
+            return theDataSet;
+        }
+
+        public List<String> fn_ibca_bodega_get_rutaEdocsEDM(String _factura)
+        {
+            List<String> respuesta = new List<String>();
+
+            try
+            {
+                using (var ctx = new IBCA_BIEntities())
+                {
+                    ctx.Database.CommandTimeout = 0;
+                    respuesta = ctx.fn_ibca_bodega_get_rutaEdocs(_factura).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                general.Log("Error en fn_ibca_bodega_get_rutaEdocsEDM: " + ex.Message, Generales.TiposError.error);
+                throw ex;
+            }
+
+            return respuesta;
+        }
+
+        public List<fn_ibca_reporteweb_bodega_factura_seguimientodespacho_Result> fn_ibca_reporteweb_bodega_factura_seguimientodespachoEDM(DateTime? _Fecha, String _Factura, String _Ciudad)
+        {
+            List<fn_ibca_reporteweb_bodega_factura_seguimientodespacho_Result> guiaInfoList = new List<fn_ibca_reporteweb_bodega_factura_seguimientodespacho_Result>();
+
+            try
+            {
+                using (var ctx = new IBCA_BIEntities())
+                {
+                    ctx.Database.CommandTimeout = 0;
+                    guiaInfoList = ctx.fn_ibca_reporteweb_bodega_factura_seguimientodespacho(_Fecha, _Factura, _Ciudad).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                general.Log("Error en fn_ibca_reporteweb_bodega_factura_seguimientodespachoEDM: " + ex.Message, Generales.TiposError.error);
+                throw ex;
+            }
+
+            return guiaInfoList;
+        }
+
+        public List<fn_ibca_bodega_get_ovcortes_Result> fn_ibca_bodega_get_ovcortesEDM(DateTime? _Fecha, String _Ciudad)
+        {
+            List<fn_ibca_bodega_get_ovcortes_Result> respuesta = new List<fn_ibca_bodega_get_ovcortes_Result>();
+
+            try
+            {
+                using (var ctx = new IBCA_BIEntities())
+                {
+                    ctx.Database.CommandTimeout = 0;
+                    respuesta = ctx.fn_ibca_bodega_get_ovcortes(_Fecha, _Ciudad).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                general.Log("Error en fn_ibca_bodega_get_ovcortesEDM: " + ex.Message, Generales.TiposError.error);
+                throw ex;
+            }
+
+            return respuesta;
+        }
+
+        public int sp_ibca_bodega_set_suspender_OV_cortesEDM(String _ov, String _motivo)
+        {
+            int respuesta = 0;
+
+            try
+            {
+                using (var ctx = new IBCA_BIEntities())
+                {
+                    ctx.Database.CommandTimeout = 0;
+                    respuesta = ctx.sp_ibca_bodega_set_suspender_OV_cortes(_ov, _motivo);
+                }
+            }
+            catch (Exception ex)
+            {
+                general.Log("Error en sp_ibca_bodega_set_suspender_OV_cortesEDM: " + ex.Message, Generales.TiposError.error);
+                throw ex;
+            }
+
+            return respuesta;
+        }
+
+        public DataSet getMotivosSuspenderCorteADO()
+        {
+            DataSet theDataSet = new DataSet("getMotivosSuspenderCorteADO");
+            String connectionString = ConfigurationManager.ConnectionStrings["IBCA_BIConnectionString"].ConnectionString;
+
+            try
+            {
+                SqlCommand theCommand = new SqlCommand("SELECT [valor] FROM [IBCA_BI].[dbo].[IBCA_PARAMETROS] where clave like 'CORTE_SUSPEND_OV'");
+                theCommand.Connection = new SqlConnection(connectionString);
+                theCommand.CommandTimeout = 0;
+
+                SqlDataAdapter theDataAdapter = new SqlDataAdapter(theCommand);
+                theCommand.Connection.Open();
+                theDataAdapter.Fill(theDataSet);
+                theCommand.Connection.Close();
+            }
+            catch (Exception ex)
+            {
+                general.Log(ex.Message, Generales.TiposError.error);
+            }
+
+            return theDataSet;
+        }
+
+        public List<fn_ibca_bodega_get_listado_ordenventa_peso_Result> fn_ibca_bodega_get_listado_ordenventa_pesoEDM(String _OV)
+        {
+            List<fn_ibca_bodega_get_listado_ordenventa_peso_Result> respuesta = new List<fn_ibca_bodega_get_listado_ordenventa_peso_Result>();
+
+            try
+            {
+                using (var ctx = new IBCA_BIEntities())
+                {
+                    ctx.Database.CommandTimeout = 0;
+                    respuesta = ctx.fn_ibca_bodega_get_listado_ordenventa_peso(_OV).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                general.Log("Error en fn_ibca_bodega_get_listado_ordenventa_pesoEDM: " + ex.Message, Generales.TiposError.error);
+                throw ex;
+            }
+
+            return respuesta;
+        }
+
+        public int sp_ibca_bodega_set_pesaje_OV_cortesEDM(fn_ibca_bodega_get_listado_ordenventa_peso_Result _ov)
+        {
+            int respuesta = 0;
+
+            try
+            {
+                using (var ctx = new IBCA_BIEntities())
+                {
+                    ctx.Database.CommandTimeout = 0;
+                    respuesta = ctx.sp_ibca_bodega_set_pesaje_OV_cortes(_ov.ordenventa, _ov.itemid, _ov.pesaje, _ov.corte, _ov.usr_abastecimiento);
+                }
+            }
+            catch (Exception ex)
+            {
+                general.Log("Error en sp_ibca_bodega_set_pesaje_OV_cortesEDM: " + ex.Message, Generales.TiposError.error);
+                throw ex;
+            }
+
+            return respuesta;
+        }
+
+        public List<fn_ibca_bodega_get_Listadofacturado_OVCortes_Result> fn_ibca_bodega_get_Listadofacturado_OVCortesEDM(DateTime? _fecha)
+        {
+            List<fn_ibca_bodega_get_Listadofacturado_OVCortes_Result> respuesta = new List<fn_ibca_bodega_get_Listadofacturado_OVCortes_Result>();
+
+            try
+            {
+                using (var ctx = new IBCA_BIEntities())
+                {
+                    ctx.Database.CommandTimeout = 0;
+                    respuesta = ctx.fn_ibca_bodega_get_Listadofacturado_OVCortes(_fecha).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                general.Log("Error en fn_ibca_bodega_get_Listadofacturado_OVCortesEDM: " + ex.Message, Generales.TiposError.error);
+                throw ex;
+            }
+
+            return respuesta;
+        }
+
+        public List<fn_ibca_bodega_get_OV_detalle_corte_Result> fn_ibca_bodega_get_OV_detalle_corteEDM(String _ov)
+        {
+            List<fn_ibca_bodega_get_OV_detalle_corte_Result> respuesta = new List<fn_ibca_bodega_get_OV_detalle_corte_Result>();
+
+            try
+            {
+                using (var ctx = new IBCA_BIEntities())
+                {
+                    ctx.Database.CommandTimeout = 0;
+                    respuesta = ctx.fn_ibca_bodega_get_OV_detalle_corte(_ov).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                general.Log("Error en fn_ibca_bodega_get_OV_detalle_corteEDM: " + ex.Message, Generales.TiposError.error);
+                throw ex;
+            }
+
+            return respuesta;
+        }
+
+        public List<fn_ibca_bodega_get_cortes_ListadoOVMaquina_Result> fn_ibca_bodega_get_cortes_ListadoOVMaquinaEDM(int? _Maquina)
+        {
+            List<fn_ibca_bodega_get_cortes_ListadoOVMaquina_Result> respuesta = new List<fn_ibca_bodega_get_cortes_ListadoOVMaquina_Result>();
+
+            try
+            {
+                using (var ctx = new IBCA_BIEntities())
+                {
+                    ctx.Database.CommandTimeout = 0;
+                    respuesta = ctx.fn_ibca_bodega_get_cortes_ListadoOVMaquina(_Maquina).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                general.Log("Error en fn_ibca_bodega_get_cortes_ListadoOVMaquinaEDM: " + ex.Message, Generales.TiposError.error);
+                throw ex;
+            }
+
+            return respuesta;
+        }
+
+        public List<fn_ibca_reporteweb_bodega_ordenventa_parareserva_Result> fn_ibca_reporteweb_bodega_ordenventa_parareservaEDM(DateTime? _Fecha, String filtro)
+        {
+            List<fn_ibca_reporteweb_bodega_ordenventa_parareserva_Result> respuesta = new List<fn_ibca_reporteweb_bodega_ordenventa_parareserva_Result>();
+
+            try
+            {
+                using (var ctx = new IBCA_BIEntities())
+                {
+                    ctx.Database.CommandTimeout = 0;
+                    respuesta = ctx.fn_ibca_reporteweb_bodega_ordenventa_parareserva(_Fecha, filtro).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                general.Log("Error en fn_ibca_reporteweb_bodega_ordenventa_parareservaEDM: " + ex.Message, Generales.TiposError.error);
+                throw ex;
+            }
+
+            return respuesta;
+        }
+
+        public List<fn_ibca_bodega_get_listado_itemsfiltrado_Result> fn_ibca_bodega_get_listado_itemsfiltradoEDM()
+        {
+            List<fn_ibca_bodega_get_listado_itemsfiltrado_Result> respuesta = new List<fn_ibca_bodega_get_listado_itemsfiltrado_Result>();
+
+            try
+            {
+                using (var ctx = new IBCA_BIEntities())
+                {
+                    ctx.Database.CommandTimeout = 0;
+                    respuesta = ctx.fn_ibca_bodega_get_listado_itemsfiltrado().ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                general.Log("Error en fn_ibca_bodega_get_listado_itemsfiltradoEDM: " + ex.Message, Generales.TiposError.error);
+                throw ex;
+            }
+
+            return respuesta;
+        }
+
+        public List<fn_ibca_reporteweb_bodega_factura_nodespachada_bod_Result> fn_ibca_reporteweb_bodega_factura_nodespachada_bodEDM(DateTime? _Fecha, String _Factura, String _Ciudad)
+        {
+            List<fn_ibca_reporteweb_bodega_factura_nodespachada_bod_Result> respuesta = new List<fn_ibca_reporteweb_bodega_factura_nodespachada_bod_Result>();
+
+            try
+            {
+                using (var ctx = new IBCA_BIEntities())
+                {
+                    ctx.Database.CommandTimeout = 0;
+                    respuesta = ctx.fn_ibca_reporteweb_bodega_factura_nodespachada_bod(_Fecha, _Factura, _Ciudad).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                general.Log("Error en fn_ibca_reporteweb_bodega_factura_nodespachada_bodEDM: " + ex.Message, Generales.TiposError.error);
+                throw ex;
+            }
+
+            return respuesta;
+        }
+
+        public int sp_ibca_bodega_registra_fechadespacho_bodega2EDM(String _factura)
+        {
+            int respuesta = 0;
+            try
+            {
+                using (var ctx = new IBCA_BIEntities())
+                {
+                    ctx.Database.CommandTimeout = 0;
+                    respuesta = ctx.sp_ibca_bodega_registra_fechadespacho_bodega2(_factura);
+                }
+            }
+            catch (Exception ex)
+            {
+                general.Log("Error en sp_ibca_bodega_registra_fechadespacho_bodega2EDM: " + ex.Message, Generales.TiposError.error);
+                throw ex;
+            }
+            return respuesta;
+        }
+
+        public List<fn_ibca_bodega_get_listadoetiquetas_Result> fn_ibca_bodega_get_listadoetiquetasEDM()
+        {
+            List<fn_ibca_bodega_get_listadoetiquetas_Result> respuesta = new List<fn_ibca_bodega_get_listadoetiquetas_Result>();
+
+            try
+            {
+                using (var ctx = new IBCA_BIEntities())
+                {
+                    ctx.Database.CommandTimeout = 0;
+                    respuesta = ctx.fn_ibca_bodega_get_listadoetiquetas().ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                general.Log("Error en fn_ibca_bodega_get_listadoetiquetasEDM: " + ex.Message, Generales.TiposError.error);
+                throw ex;
+            }
+
+            return respuesta;
+        }
+    }
+}
