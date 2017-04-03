@@ -1,0 +1,61 @@
+using Inspinia_MVC5.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Web;
+
+namespace Inspinia_MVC5.Classes
+{
+    public class DepartamentoClass
+    {
+        Modelo Modelo = new Modelo();
+        Generales general = new Generales();
+
+        public List<Departamento> getDepartamentos(Int16 nivelBusqueda)
+        {
+            List<Departamento> departamentoList = new List<Departamento>();
+
+            try
+            {
+                if (nivelBusqueda == 1)
+                {
+                    departamentoList = Modelo.Departamento.ToList();
+                }
+                else
+                {
+                    departamentoList = Modelo.Departamento.ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                general.Log(ex.Message, Generales.TiposError.error);
+            }
+
+            return departamentoList;
+        }
+
+        public async Task<Departamento> getDepartamentoById(Int16 nivelBusqueda, int? id)
+        {
+            Departamento departamento = new Departamento();
+
+            try
+            {
+                if (nivelBusqueda == 1)
+                {
+                    departamento = await Modelo.Departamento.FindAsync(id);
+                }
+                else
+                {
+                    departamento = await Modelo.Departamento.FindAsync(id);
+                }
+            }
+            catch (Exception ex)
+            {
+                general.Log(ex.Message, Generales.TiposError.error);
+            }
+
+            return departamento;
+        }
+    }
+}
