@@ -1,0 +1,32 @@
+using Inspinia_MVC5.ModelsBI;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+
+namespace Inspinia_MVC5.BusinessIntelligence
+{
+    public class ReportesBi
+    {
+        public List<fn_kardex_Result> fn_kardexEDM(int? _codigo, int? _bodega)
+        {
+            List<fn_kardex_Result> proyeccionList = new List<fn_kardex_Result>();
+
+            try
+            {
+                using (var ctx = new portalwebEntities())
+                {
+                    ctx.Database.CommandTimeout = 0;
+                    proyeccionList = ctx.fn_kardex(_codigo, _bodega).ToList();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return proyeccionList;
+        }
+    }
+}
